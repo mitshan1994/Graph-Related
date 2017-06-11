@@ -60,6 +60,9 @@ public:
     void Print() const;
 
     ~Graph() = default;
+
+    // 友元
+    friend class GraphAlgorithm;
 private:
     // 所有的顶点
     std::list<T> vertex_;
