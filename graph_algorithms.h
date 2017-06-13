@@ -35,6 +35,8 @@ public:
                                    std::map<T, Statues<T>> &table);
 
     // 选取下一个需要处理的点(下一个添加到生成树里的点)
+    // 如果table中所有的点的known为false, 则必须保证所有的点的dv为kInfinity
+    // Precondition: HasFinished(table) is false
     template <typename T>
     static T PickNextVertice(std::map<T, Statues<T>> &table);
 
@@ -73,6 +75,33 @@ bool GraphAlgorithm::HasFinished(std::map<T, Statues<T>> &table)
         if (false == it->second.known)
             return false;
     return true;
+}
+
+template <typename T>
+T GraphAlgorithm::PickNextVertice(std::map<T, Statues<T>> &table)
+{
+    T pos;
+    Graph<T>::Cost min_value;
+    auto it = table.cbegin();
+    // 找到第一个known为false的点
+    while (it != table.cend()) {
+        if (it->second.known == false) {
+            pos = it->first;
+            min_value = it->second.dv;
+            break;
+        }
+        ++it;
+    }
+    // 所有的点都known, 随意返回(By precondition), behaviour undefined
+    if (it == table.cend())
+        return T{};
+    while (++it != table.cend()) {
+        if (it->second.known == false && it->second.dv < min_value) {
+            pos = it->first;
+            min_value = it->second.dv;
+        }
+    }
+    return pos;
 }
 
 #endif
