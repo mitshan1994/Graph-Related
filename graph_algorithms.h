@@ -26,12 +26,18 @@ public:
     static Graph<T> MinSpanningTree(Graph<T> &g);
 
 //private:
-    // 用于递归, 一步一步地生成Minimun spanning tree
-    // @param mst   最小生成树, 每一步都往里面添加一条边
+    // 返回顶点v在table中对应的pv(详情见struct Statues)
+    // Precondition: table中v对应的dv不是kInfinity. 这保证了pv是有意义的.
+    template <typename T>
+    static T GetPv(const T &v, const std::map<T, Statues<T>> &table);
+
+    // 用于一步一步地生成Minimun spanning tree
+    // @param v     这一步加入mst的点(其实是要加这个点的某一条边)
     // @param g     需要生成最小生成树的图
+    // @param mst   最小生成树, 每一步都往里面添加一条边
     // @param table 用于记录进行的状态
     template <typename T>
-    static Graph<T>& UpdateOneStep(Graph<T> &mst, Graph<T> &g, 
+    static Graph<T>& UpdateOneStep(const T & v, Graph<T> &mst,
                                    std::map<T, Statues<T>> &table);
 
     // 选取下一个需要处理的点(下一个添加到生成树里的点)
@@ -54,17 +60,56 @@ public:
 template <typename T>
 Graph<T> GraphAlgorithm::MinSpanningTree(Graph<T> &g)
 {
+    Graph<T> mst;
+    // 创建一个vector, 包含所有图g中的顶点
+    std::vector<T> vs;
+    for (auto it = g.vertex_.cbegin(); it != g.vertex_.cend(); ++it)
+        vs.push_back(*it);
+    mst.AddVertex(vs);
     std::map<T, Statues<T>> table;
     for (auto it = g.vertex_.cbegin(); it != g.vertex_.cend(); ++it)
-        table[*it] = Status{};
-
+        table[*it] = Statues<T>{ false, kInfinity, *it };  // note, here *it is important.
+                                                       // make following implementation
+                                                       // convinient.
+    while (!HasFinished(table)) {
+        auto next_vertice = PickNextVertice(table);
+        UpdateDistance(next_vertice, g, table);
+        UpdateOneStep(next_vertice, mst, table);
+    }
+    return mst;
 }
 
 template <typename T>
-Graph<T>& GraphAlgorithm::UpdateOneStep(Graph<T> &mst, Graph<T> &g,
+T GraphAlgorithm::GetPv(const T &v, const std::map<T, Statues<T>> &table)
+{
+    return table.at(v).pv;
+    // 这里如果改成下面的形式, 编译不通过, 不知为何
+    // return table[v].pv;
+}
+
+template <typename T>
+Graph<T>& GraphAlgorithm::UpdateOneStep(const T & v, Graph<T> &mst,
                                         std::map<T, Statues<T>> &table)
 {
+    mst.AddEdge(v, table[v].pv, table[v].dv);
+    return mst;
+}
 
+template <typename T>
+void GraphAlgorithm::UpdateDistance(const T &v, Graph<T> &g, std::map<T, Statues<T>> &table)
+{
+    auto it = g.edges_.at(v).cbegin();  // it points to std::pair<T, Cost>
+    while (it != g.edges_.at(v).cend()) {
+        if (table.at(it->first).known == true) {
+            ++it;
+            continue;
+        }
+        if (it->second < table.at(it->first).dv) {
+            table[it->first].dv = it->second;
+            table[it->first].pv = v;
+        }
+        ++it;
+    }
 }
 
 template <typename T>
@@ -101,6 +146,7 @@ T GraphAlgorithm::PickNextVertice(std::map<T, Statues<T>> &table)
             min_value = it->second.dv;
         }
     }
+    table[pos].known = true;
     return pos;
 }
 

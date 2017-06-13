@@ -132,6 +132,9 @@ bool Graph<T>::IsConnected(const T & v1, const T & v2) const
         std::cerr << "IsConnected: " << v1 << " does not exist.\n";
         return false;
     }
+    // 自身和自身是连通的
+    if (v1 == v2)
+        return true;
     // 这里不能使用auto it = edges_[v1].cbegin();
     // 因为map的[]运算符不是const的, 但是IsConnected需要是const
     // (应该是这样)

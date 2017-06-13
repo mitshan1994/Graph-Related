@@ -55,4 +55,14 @@ BOOST_AUTO_TEST_CASE(choose_vertex) {
     table[4].dv = 10;
     next_picked = GraphAlgorithm::PickNextVertice<int>(table);
     BOOST_TEST(2 == next_picked);
+    BOOST_TEST(GraphAlgorithm::GetPv(5, table) == 1);
+    BOOST_TEST(GraphAlgorithm::GetPv(6, table) == 5);
+}
+
+// 手工测试, 直接避免写main函数
+BOOST_AUTO_TEST_CASE(main_test) {
+    Graph<int> g;
+    ReadGraph(g);
+    g.Print();
+    GraphAlgorithm::MinSpanningTree(g).Print();
 }
