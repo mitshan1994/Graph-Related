@@ -25,7 +25,7 @@ public:
     template <typename T>
     static Graph<T> MinSpanningTree(Graph<T> &g);
 
-//private:
+private:
     // 返回顶点v在table中对应的pv(详情见struct Statues)
     // Precondition: table中v对应的dv不是kInfinity. 这保证了pv是有意义的.
     template <typename T>
