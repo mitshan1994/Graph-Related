@@ -25,6 +25,11 @@ public:
     template <typename T>
     static Graph<T> MinSpanningTree(Graph<T> &g);
 
+    // 是否存在欧拉回路
+    // 这里的欧拉回路, 要求起点和终点是同一个
+    template <typename T>
+    static bool EulerCircuitExist(Graph<T> &g);
+
 private:
     // 返回顶点v在table中对应的pv(详情见struct Statues)
     // Precondition: table中v对应的dv不是kInfinity. 这保证了pv是有意义的.
@@ -77,6 +82,18 @@ Graph<T> GraphAlgorithm::MinSpanningTree(Graph<T> &g)
         UpdateOneStep(next_vertice, mst, table);
     }
     return mst;
+}
+
+// 如果每个顶点处的度数都为偶数, 并且是连通图, 则存在欧拉回路
+template<typename T>
+bool GraphAlgorithm::EulerCircuitExist(Graph<T>& g)
+{
+    if (g.IsConnected() == false)
+        return false;
+    for (auto it = g.vertex_.cbegin(); it != g.vertex_.cend(); ++it)
+        if (g.edges_.at(*it).size() % 2 != 0)
+            return false;
+    return true;
 }
 
 template <typename T>
