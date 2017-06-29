@@ -61,7 +61,7 @@ public:
 
     ~Graph() = default;
 
-    // 友元
+    // 实现图算法需要访问到图的细节部分
     friend class GraphAlgorithm;
 private:
     // 所有的顶点
